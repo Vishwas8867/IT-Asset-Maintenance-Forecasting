@@ -35,56 +35,80 @@ The goal is to **reduce downtime**, **plan maintenance proactively**, and **opti
 | **Database** | Microsoft SQL Server | Centralized data storage |
 | **Visualization** | Tableau | Interactive dashboard creation |
 | **Environment** | Jupyter Notebook / VS Code | Development workspace |
+# IT Asset Maintenance Forecasting
+
+
+## 🚀 Project Workflow
+
+The project is executed in three main phases:
+
+### Phase 1: Data Analysis & Forecasting (Python)
+
+This phase focuses on data preparation, exploratory data analysis (EDA), and identifying key trends for maintenance.
+
+* **Data Cleaning:**
+    * Loaded the `IT_ASSESMENT.xlsx - ITAssets.csv` dataset.
+    * Handled all missing or null values.
+    * Converted `PurchaseDate`, `LastServiceDate`, and `NextServiceDue` to proper datetime objects.
+* **Feature Engineering:**
+    * Created new time-based features:
+        * `AssetAge`: (Current Date - PurchaseDate)
+        * `DaysSinceLastService`: (Current Date - LastServiceDate)
+        * `DaysUntilDue`: (NextServiceDue - Current Date)
+* **Exploratory Data Analysis (EDA):**
+    * Analyzed and plotted the distribution of `AssetType` (Laptop, Printer, etc.).
+    * Calculated the current failure rate by analyzing the `Status` column (`Working` vs. `Under Repair`).
+    * Calculated descriptive statistics for `AssetAge` and `DaysSinceLastService` to understand the average asset lifespan and service cycle.
+* **Maintenance Schedule Analysis:**
+    * Filtered the data to create a list of 'At-Risk' assets (e.g., `DaysUntilDue` < 30 days).
+    * Visualized the count of assets due for maintenance, grouped by `AssetType` and `Location`.
+
+### Phase 2: Database Management (MS SQL)
+
+This phase establishes a centralized SQL database for robust data storage and efficient, reusable querying.
+
+* **Schema Creation:**
+    * Wrote a `CREATE TABLE` script to define the `ITAssets` table with appropriate data types (e.g., `VARCHAR`, `DATE`, `INT`).
+* **Data Ingestion:**
+    * Exported the cleaned DataFrame from Phase 1 to a new CSV.
+    * Used the SQL Server Import Wizard (or `INSERT` commands) to populate the `ITAssets` table.
+* **Aggregate Querying:**
+    * Wrote SQL queries using `COUNT` and `GROUP BY` to analyze asset distribution by `AssetType` and `Location` directly from the database.
+* **'At-Risk' Asset Querying:**
+    * Developed a reusable SQL query using a `WHERE` clause to select all assets due for maintenance within the next 30 days (`WHERE NextServiceDue BETWEEN GETDATE() AND GETDATE() + 30`).
+    * Results are ordered by `NextServiceDue` (ascending) to prioritize the most urgent tasks.
+
+### Phase 3: Visualization & Dashboarding (Tableau)
+
+The final phase involves creating an intuitive and interactive dashboard to communicate maintenance forecasts and asset status to stakeholders.
+
+* **Data Connection:**
+    * Established a live data source connection from Tableau to the MS SQL Server `ITAssets` table.
+* **Core Visualizations:**
+    * **Bar Chart:** Asset Distribution by Type.
+    * **KPI Card:** Total count of 'Assets Due for Maintenance (Next 30 Days)'.
+    * **Packed Bubble Chart:** 'Assets Under Repair' (sized by count, colored by `AssetType`).
+    * **Heatmap:** Asset Type vs. Location (showing count of assets).
+    * **Map:** Geographic visualization of assets by `Location`.
+* **Dashboard Assembly & Interactivity:**
+    * Combined all worksheets into a single, cohesive dashboard.
+    * Implemented "Filter" controls for `Location` and `AssetType`.
+    * Configured filters to apply to all worksheets, allowing managers to drill down into specific data (e.g., see all 'Laptops' in 'Pune' due for service) and have all charts update in real-time.
 
 ---
 
-## ⚙️ Data Preparation
+## 🔧 How to Use
 
-1. **Load Dataset:**  
-   - Import the `ITAssets.csv` / Excel dataset into Pandas  
+1.  **Python:** Run the data cleaning and feature engineering scripts (e.g., in a Jupyter Notebook) to produce the cleaned dataset.
+2.  **MS SQL:**
+    * Execute the `CREATE TABLE` script in your SQL Server instance.
+    * Import the cleaned CSV file into the newly created `ITAssets` table.
+    * Use the provided SQL queries to retrieve aggregated insights or 'At-Risk' asset lists.
+3.  **Tableau:**
+    * Open the `.twbx` Tableau workbook.
+    * Edit the data source connection to point to your MS SQL Server instance and the `ITAssets` table.
+    * Interact with the dashboard filters to explore the maintenance schedule.
 
-2. **Clean and Format:**  
-   - Handle missing values  
-   - Convert `PurchaseDate`, `LastServiceDate`, `NextServiceDue` to datetime  
+## 📜 License
 
-3. **Feature Engineering:**  
-   - `AssetAge` (Years since purchase)  
-   - `DaysSinceLastService` (Maintenance interval tracking)  
-   - `DaysUntilDue` (Service urgency indicator)
-
-4. **At-Risk Identification:**  
-   - Flag assets where `DaysUntilDue < 30`  
-
----
-
-## 📈 Key Performance Indicators (KPIs)
-
-| KPI | Description |
-|-----|-------------|
-| **Total IT Assets** | Total count of assets in inventory |
-| **Assets Under Repair** | Assets currently in repair status |
-| **Assets Due in Next 30 Days** | Maintenance-critical assets |
-| **Average Asset Age** | Helps determine lifecycle planning |
-
----
-
-## 📊 Insights & Visualizations
-
-The Tableau dashboard includes:
-
-- **Bar Chart:** Asset Distribution by Type  
-- **KPI Card:** Assets Due for Service Soon  
-- **Packed Bubble Chart:** Assets Under Repair  
-- **Heatmap:** Asset Type vs Location  
-- **Filters:** By Location & Asset Type  
-
----
-
-## 🗄 SQL Operations Snapshot
-
-**Query to Identify Assets Due for Maintenance (Next 30 Days):**
-```sql
-SELECT *
-FROM ITAssets
-WHERE NextServiceDue BETWEEN GETDATE() AND DATEADD(DAY, 30, GETDATE())
-ORDER BY NextServiceDue ASC;
+This project is licensed under the MIT License.
