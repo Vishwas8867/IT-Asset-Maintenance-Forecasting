@@ -108,7 +108,3 @@ The final phase involves creating an intuitive and interactive dashboard to comm
     * Open the `.twbx` Tableau workbook.
     * Edit the data source connection to point to your MS SQL Server instance and the `ITAssets` table.
     * Interact with the dashboard filters to explore the maintenance schedule.
-
-## 📜 License
-
-This project is licensed under the MIT License.
